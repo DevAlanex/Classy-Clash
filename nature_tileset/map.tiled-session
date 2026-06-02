@@ -1,0 +1,27 @@
+{
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "Nature RPG Tileset.tsx": {
+            "scaleInDock": 0.25,
+            "scaleInEditor": 1
+        },
+        "untitled.tmx": {
+            "scale": 0.46263020833333335,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 384.7565437658317,
+                "y": 383.67576695750074
+            }
+        }
+    },
+    "openFiles": [
+        "untitled.tmx",
+        "Nature RPG Tileset.tsx"
+    ],
+    "recentFiles": [
+        "Nature RPG Tileset.tsx",
+        "untitled.tmx"
+    ]
+}
