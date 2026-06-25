@@ -1,0 +1,35 @@
+#include "raylib.h"
+
+class Character {
+    public:
+        // Constructor
+        Character();
+
+        // Map
+        Vector2 getWorldPos() { return worldPos; }
+        void setScreenPos(int winWidth, int winHeight);
+        void tick(float deltaTime);
+        void undoMovement();
+
+    private:
+        Texture2D texture{LoadTexture("characters/knight_idle_spritesheet.png")};
+        Texture2D idle{LoadTexture("characters/knight_idle_spritesheet.png")};
+        Texture2D run{LoadTexture("characters/knight_run_spritesheet.png")};
+        Vector2 screenPos{};
+        Vector2 worldPos{};
+
+        // Bounds
+        Vector2 worldPosLastFrame{};
+
+        // 1 : right facing, -1 : left facing
+        float directionOfTravel{1.f};
+
+        // Animation Variables
+        float runningTime{};
+        int frame{};
+        int maxFrames{6};
+        float updateTime{1.f/12.f};
+        float speed{4.f};
+        float width{};
+        float height{};
+};
