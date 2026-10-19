@@ -1,61 +1,69 @@
 #include "Character.h"
 #include "raymath.h"
 
-Character::Character(int winWidth, int winHeight) {
+Character::Character(int winWidth, int winHeight) : windowWidth{winWidth}, windowHeight{winHeight} {
     width = texture.width / maxFrames;
     height = texture.height;
+}
 
-    screenPos = {
-        static_cast<float>(winWidth) / 2.0f - scale * (0.5f * width),
-        static_cast<float>(winHeight) / 2.0f - scale * (0.5f * height)
+Vector2 Character::getScreenPos() {
+    return Vector2 {
+        static_cast<float>(windowWidth) / 2.0f - scale * (0.5f * width),
+        static_cast<float>(windowHeight) / 2.0f - scale * (0.5f * height)
     };
 }
 
 void Character::tick(float deltaTime) {
-    worldPosLastFrame = worldPos;
-    Vector2 direction{};
-    if(IsKeyDown(KEY_A)) direction.x -= 1.0;
-    if(IsKeyDown(KEY_D)) direction.x += 1.0;
-    if(IsKeyDown(KEY_W)) direction.y -= 1.0;
-    if(IsKeyDown(KEY_S)) direction.y += 1.0;
+    if(!getAlive()) return;
+    if(IsKeyDown(KEY_A)) velocity.x -= 1.0;
+    if(IsKeyDown(KEY_D)) velocity.x += 1.0;
+    if(IsKeyDown(KEY_W)) velocity.y -= 1.0;
+    if(IsKeyDown(KEY_S)) velocity.y += 1.0;
 
-    if(Vector2Length(direction) != 0.0) {
+    BaseCharacter::tick(deltaTime);
 
-        //set worldPos = worldPos + direction
-        worldPos = Vector2Add(worldPos, Vector2Scale(Vector2Normalize(direction), speed));
-        direction.x < 0.f ? directionOfTravel = -1.f : directionOfTravel = 1.f;
-        texture = run;
+    Vector2 origin{};
+    Vector2 offset{};
+    float rotation{};
+    if( directionOfTravel > 0.f) {
+        origin = {0.f, weapon.height * scale};
+        offset = {35.f, 55.f};
+        rotation = IsMouseButtonDown(MOUSE_BUTTON_LEFT) ? 35.F : 0.F;
+        weaponCollisionRec = {
+            getScreenPos().x + offset.x,
+            getScreenPos().y + offset.y - weapon.height * scale,
+            weapon.width * scale,
+            weapon.height * scale
+        };  
     }
     else {
-        texture = idle;
+        origin = {weapon.width * scale, weapon.height * scale};
+        offset = {25.f, 55.f};
+        rotation = IsMouseButtonDown(MOUSE_BUTTON_LEFT) ? -35.F : 0.F;
+        weaponCollisionRec = {
+            getScreenPos().x + offset.x - weapon.width* scale,
+            getScreenPos().y + offset.y - weapon.height * scale,
+            weapon.width * scale,
+            weapon.height * scale
+        };
     }
+    // Draw the Sword
+    Rectangle source{0.f, 0.f, static_cast<float>(weapon.width) * directionOfTravel, static_cast<float>(weapon.height) };
+    Rectangle dest{getScreenPos().x + offset.x, getScreenPos().y + offset.y, weapon.width * scale, weapon.height *scale};
+    DrawTexturePro(weapon, source, dest, origin, rotation, WHITE);
 
-    // Updating Animation Frame
-    runningTime += deltaTime;
-    if (runningTime >= updateTime) {
-        frame++;
-        runningTime = 0.f;
-        if (frame > maxFrames) 
-            frame = 0;
-    }
-
-    // Draw the character variables
-    Rectangle source { frame * width, 0.f, directionOfTravel * width, height};
-    Rectangle dest {screenPos.x, screenPos.y, scale * width, scale * height};
-
-    // Draw the character
-    DrawTexturePro(texture, source, dest, Vector2{}, 0.f, WHITE);
+    // DrawRectangleLines(
+    //     weaponCollisionRec.x,
+    //     weaponCollisionRec.y,
+    //     weaponCollisionRec.width,
+    //     weaponCollisionRec.height,
+    //     RED
+    // );
 }
 
-void Character::undoMovement() {
-    worldPos = worldPosLastFrame;
-}
-
-Rectangle Character::getCollisionRec() {
-    return Rectangle{
-        screenPos.x,
-        screenPos.y,
-        width * scale,
-        height * scale
-    };
+void Character::takeDamage(float damage) {
+    health -= damage;
+    if (health < 0.f) {
+        setAlive(false);
+    }
 }
